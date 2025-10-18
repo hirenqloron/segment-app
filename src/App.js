@@ -54,8 +54,7 @@ const App = () => {
     };
 
     try {
-      // Your webhook.site URL
-      const webhookUrl = 'https://webhook.site/e7243387-f87e-41b4-9257-8fb272373b8d';
+      const webhookUrl = 'https://webhook.site/e7243387-f87e-41b4-9257-8fb27237383d';
       
       const response = await fetch(webhookUrl, {
         method: 'POST',
