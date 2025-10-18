@@ -1,39 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const App = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [segmentName, setSegmentName] = useState('');
+  const [segmentName, setSegmentName] = useState("");
   const [selectedSchemas, setSelectedSchemas] = useState([]);
-  const [currentSchema, setCurrentSchema] = useState('');
+  const [currentSchema, setCurrentSchema] = useState("");
 
   const allSchemaOptions = [
-    { label: 'First Name', value: 'first_name' },
-    { label: 'Last Name', value: 'last_name' },
-    { label: 'Gender', value: 'gender' },
-    { label: 'Age', value: 'age' },
-    { label: 'Account Name', value: 'account_name' },
-    { label: 'City', value: 'city' },
-    { label: 'State', value: 'state' }
+    { label: "First Name", value: "first_name" },
+    { label: "Last Name", value: "last_name" },
+    { label: "Gender", value: "gender" },
+    { label: "Age", value: "age" },
+    { label: "Account Name", value: "account_name" },
+    { label: "City", value: "city" },
+    { label: "State", value: "state" },
   ];
 
   const getAvailableOptions = (excludeIndex = null) => {
     const selectedValues = selectedSchemas
       .filter((_, index) => index !== excludeIndex)
-      .map(schema => schema.value);
-    return allSchemaOptions.filter(option => !selectedValues.includes(option.value));
+      .map((schema) => schema.value);
+    return allSchemaOptions.filter(
+      (option) => !selectedValues.includes(option.value)
+    );
   };
 
   const handleAddSchema = () => {
     if (currentSchema) {
-      const selectedOption = allSchemaOptions.find(opt => opt.value === currentSchema);
+      const selectedOption = allSchemaOptions.find(
+        (opt) => opt.value === currentSchema
+      );
       setSelectedSchemas([...selectedSchemas, selectedOption]);
-      setCurrentSchema('');
+      setCurrentSchema("");
     }
   };
 
   const handleSchemaChange = (index, newValue) => {
     const updatedSchemas = [...selectedSchemas];
-    const selectedOption = allSchemaOptions.find(opt => opt.value === newValue);
+    const selectedOption = allSchemaOptions.find(
+      (opt) => opt.value === newValue
+    );
     updatedSchemas[index] = selectedOption;
     setSelectedSchemas(updatedSchemas);
   };
@@ -44,41 +50,55 @@ const App = () => {
   };
 
   const handleSaveSegment = async () => {
-    const schemaArray = selectedSchemas.map(schema => ({
-      [schema.value]: schema.label
+    let schemasToSave = [...selectedSchemas];
+    if (
+      currentSchema &&
+      !selectedSchemas.find((s) => s.value === currentSchema)
+    ) {
+      const selectedOption = allSchemaOptions.find(
+        (opt) => opt.value === currentSchema
+      );
+      schemasToSave.push(selectedOption);
+    }
+
+    const schemaArray = schemasToSave.map((schema) => ({
+      [schema.value]: schema.label,
     }));
 
     const payload = {
       segment_name: segmentName,
-      schema: schemaArray
+      schema: schemaArray,
     };
 
     try {
-      const webhookUrl = 'https://webhook.site/e7243387-f87e-41b4-9257-8fb27237383d';
-      
+      const webhookUrl =
+        "https://webhook.site/e7243387-f87e-41b4-9257-8fb27237383d";
+
+      console.log("Sending payload:", JSON.stringify(payload, null, 2));
+
       const response = await fetch(webhookUrl, {
-        method: 'POST',
+        method: "POST",
+        mode: "no-cors",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        alert('Segment saved successfully!');
-        handleClosePopup();
-      }
+      console.log("Request sent successfully");
+      alert("Segment saved successfully!");
+      handleClosePopup();
     } catch (error) {
-      console.error('Error saving segment:', error);
-      alert('Error saving segment. Please try again.');
+      console.error("Error saving segment:", error);
+      alert("Error saving segment. Please try again.");
     }
   };
 
   const handleClosePopup = () => {
     setIsPopupOpen(false);
-    setSegmentName('');
+    setSegmentName("");
     setSelectedSchemas([]);
-    setCurrentSchema('');
+    setCurrentSchema("");
   };
 
   return (
@@ -119,7 +139,8 @@ const App = () => {
                 </div>
 
                 <p className="text-sm text-gray-600 mb-4">
-                  To save your segment, you need to add the schemas to build the query
+                  To save your segment, you need to add the schemas to build the
+                  query
                 </p>
 
                 <div className="flex items-center gap-4 mb-4 text-sm">
@@ -140,11 +161,13 @@ const App = () => {
                         <span className="w-3 h-3 bg-green-500 rounded-full flex-shrink-0"></span>
                         <select
                           value={schema.value}
-                          onChange={(e) => handleSchemaChange(index, e.target.value)}
+                          onChange={(e) =>
+                            handleSchemaChange(index, e.target.value)
+                          }
                           className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                         >
                           <option value={schema.value}>{schema.label}</option>
-                          {getAvailableOptions(index).map(option => (
+                          {getAvailableOptions(index).map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
                             </option>
@@ -168,7 +191,7 @@ const App = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-600"
                   >
                     <option value="">Add schema to segment</option>
-                    {getAvailableOptions().map(option => (
+                    {getAvailableOptions().map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -188,7 +211,10 @@ const App = () => {
               <div className="px-6 py-4 bg-gray-50 border-t flex justify-start gap-3">
                 <button
                   onClick={handleSaveSegment}
-                  disabled={!segmentName || selectedSchemas.length === 0}
+                  disabled={
+                    !segmentName ||
+                    (selectedSchemas.length === 0 && !currentSchema)
+                  }
                   className="bg-teal-500 text-white px-6 py-2 rounded hover:bg-teal-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Save the Segment
